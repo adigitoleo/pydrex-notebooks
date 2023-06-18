@@ -5,6 +5,7 @@
 !!! The strain algorithm was modified to use fixed timesteps and no location information.
 !!! The deriv algorithm was modified to remove code for enstatite.
 !!! FIXME: Fix dimension mismatch issue in dotodf L488 and add output writing.
+!!! FIXME: We can use the `parameter` attribute to assign constants and avoid some hassle.
 
 module parameters
     implicit none
