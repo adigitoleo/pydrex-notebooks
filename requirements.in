@@ -1,0 +1,6 @@
+flake8
+mypy
+black
+jupyterlab
+fortran-linter
+git+https://github.com/adigitoleo/PyDRex#egg=pydrex
