@@ -3,4 +3,6 @@ mypy
 black
 jupyterlab
 fortran-linter
+jupytext
+matplotlib
 git+https://github.com/adigitoleo/PyDRex#egg=pydrex
