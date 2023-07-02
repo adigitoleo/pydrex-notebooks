@@ -1,0 +1,193 @@
+*******************************************************************
+****                                                         ******
+****        FeD-Rex - the Forward Evolution D-Rex            ******
+****			version 1.0			     ******	
+****                                                         ******
+****                   Documentation                         ******
+****                                                         ******
+****        	   E. Lev,  April 2008	                     ******  
+****                                                         ******
+******************************************************************* 
+The program Fed-Rex is a modification of the original program D-Rex 
+by Eduard Kaminski (see documentation below and in Kaminski and 
+Ribe 2004). The name Fed-Rex comes from "Forward Evolution Dynamic 
+Recrystalization", since unlike D-Rex, the new program advects 
+aggregates only forward in space and time.
+
+The new version includes the following additions and modifications:
+ 1) time-dependent input velocity fields - 
+ 	the input file input.dat now includes the time steps over 
+	which to carry out the calculation, and the velocity fields 
+	for each step may change over time.			
+
+ 2) Fully three-dimentional flow fields now supported	
+ 
+ 3) Full decomposition of the elasticity tensor into 6 symmetries, 
+  and claculation of the precentage of LPO that each symmetry 
+  contributes. This is done following the theory of Jules Browaeys 
+  and using code segments from Thorsten Becker.
+
+ 4) Random initial orientation of the grains - 
+ 	if this flag is set to zero (0) in the input file, all grains 
+	start with a random orientation. 
+	If this flag is set to 1, all grains start with an 
+	orientation of 45 degrees.
+	If this flag is set to 2, ACS and grain sizes are read from the file listed below.
+	Future development would change this to reading Euler Angles and turning them to ACS
+
+ 5) Individual aggregate initial conditions - 
+ 	Each aggregate advected in the flow can have a specific 
+	composition (percentage of olivine) and initial position 
+	(in X,Y coords).
+     
+ 6) Output files now include also the time evolution of: A-axis,
+     FSE, particle position. 
+     Also output is the final Euler angles of  the grains.	
+     					
+ 7) Analysis of computation time of various steps of the code.  
+ 
+ 
+ One future development that is highly needed is coupling with 
+ temperature and pressure - FedRex 2.0 should be able to read a 
+ tepmerature field and a pressure field, and adjust the crystal 
+ properties such as grain boundary sliding and mobility to the 
+ local conditions where the aggregate is located. This would 
+ require modification in "main", "init0", and "deriv" subroutines, 
+ but otherwise should not be a very difficult change.
+	
+
+
+*******************************************************************
+****                                                         ******
+****                       D-Rex                             ******
+****                                                         ******
+****                  Documentation                          ******
+****                                                         ******
+****           E. Kaminski,  February 2003                   ******  
+****                                                         ******
+******************************************************************* 
+.
+.
+(1)  GENERAL DESCRIPTION
+.
+.
+	The program D-Rex is to be used as a subroutine
+to calculate the LPO evolution of olivine-enstatite 
+polycrystal aggregates along pathlines in a
+convective flow. It can also be used as a main program to calculate
+the LPO development for a given arbitrary deformation.
+	The orientation distribution function (ODF) is
+described by the orientation and the volume fraction of the grains. 
+The orientation of the grains changes by plastic deformation
+and grain boundary sliding, while their volume fraction changes
+by grain boundary migration. The equations giving the time evolution
+of the orientation and of the volume fraction of the grains are given
+in Kaminski, E., and N. M. Ribe, A kinematic model for recrystallization
+and texture development in olivine polycrystals, Earth Planet. Sci. Lett.,
+189, 253-267 and Kaminski, E., N. M. Ribe and J. T. Browaeys, 
+D-Rex, a program for calculation of seismic anisotropy in the convective 
+upper mantle, submitted to Geophysical Journal International.
+	The input parameters are of two families:
+(1) the "grain" parameters are the activities of the slip
+systems of olivine and enstatite, the dimensionless grain boundary
+mobility, and the threshold volume fraction for the activation of
+grain boundary sliding
+(2) the "flow" parameters are the components of the velocity vector
+and of the velocity gradient tensor at each grid point.
+.
+*****************************************************************
+.
+.
+(2)  HINTS FOR IMPLEMENTATION
+.
+.
+The subroutine D-Rex consists of 
+(1) a module "comvar" of common variables
+(2) an initialisation subroutine "init" in which the initial
+random ODF is calculated
+(3) the core subroutine "derive" which gives the time derivative
+of the orientation and of the volume fraction of the grains.
+
+An example of the incorporation of D-Rex in a convective flow
+is given for a ridge+shear flow in the program D-RexCF.f90. The
+additional subroutines in that program are
+(1) subroutine "pathline", calculates the pathline along which
+the LPO is calculated
+(2) subroutine "jacobi1", used to calculate the reference shear
+rate and the length and orientation of the axes of the finite 
+strain ellipsoid
+(3) subroutine "strain", calculates the LPO evolution using
+Runge-Kutta scheme
+(4) subroutine "derive", gives the time derivative of the
+orientation and volume fraction of the grains
+(5) subroutine "voigt", used to calculate the Cijkl tensor
+by Voigt averaging
+(6) subroutine "interp", bilinear interpolation of the velocity
+vector 
+(5) subroutine "gradientcalc", bilinear interpolation 
+of the velocity gradient tensor
+(6) subroutine "pipar" calculates the GOL parameter
+(7) subroutine "decsym", calculates the percentage of anisotropy
+and the orientation of the a-axis of the closest transverse
+isotropic media
+.
+***************************************************************
+.
+.
+(3)  INPUT PARAMETERS
+.
+.
+The input parameters are given in file "input.dat"
+
+The first line of this file is the name of the file
+containing (1) the coordinates of the grid points, Xi, (2) the
+components of the velocity vector, Vi, and (3) the components of
+the velocity gradient tensor, Lij. In the example of a 2D
+ridge+shear flow, the recording is X1, X3, V1, V2, V3, L11, L13, L23 and L31.
+
+The two first numbers of the second line give the grid size in x1 and x3 direction. 
+The two last numbers are the interval step of calculation on the grid.
+
+The third line gives the coordinates of the first (upper left) and last (lower right) points of calculation.
+
+The first number of the fourth line is "size3", the number of intervals in
+each direction of the Eulerian space used to sample the initial
+random LPO. The total number of grains is thus size3**3. 
+The second number is "Xol", the volume fraction (in %) of 
+olivine in the aggregate (from 0 to 100).
+
+The first four numbers of the fifth line are the values of the
+dimensionless critical resolved shear stresses (CRSS) of the shear
+planes of olivine, (010)[100], (001)[100], (010)[001] and
+(100)[001]. One of the fourth plane is always inactive and takes
+a dimensionless CRSS value of 1d60.
+The fifth number is the dimensionless CRSS of enstatite.
+
+The sixth line gives the value of the dimensionless grain
+boundary mobility M*, between 50 and 200.
+
+The seventh line gives the value of the threshold volume
+fraction (or grain size) for the activation of grain boundary
+sliding, between 0.2 and 0.4.
+.
+
+*********************************************************************
+.
+(4)  Description of output files
+.
+Elastic tensor: the elastic tensor is stored in an unformatted 
+fortran file Cijkl, as the 36 coefficients of the stiffness matrix Sij
+at each grid point Xi,Xj.
+
+Graphic output: the graphic files are to be run in Matlab.
+The file "veloc.m" gives the velocity field.
+The file "fse.m" gives the orientation of the long axis of the
+finite strain ellipsoid at each grid point. The length of the
+axis is given by the log of the ratio of the small axis on the
+long axis of the FSE.
+The file "a_axis.m" gives the orientation of the fast axis of
+the best hexagonal approximation of the actual elastic tensor. 
+The length of the vector is given by the percentage of anisotropy.
+
+
+

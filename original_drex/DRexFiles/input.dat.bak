@@ -1,0 +1,11 @@
+gam100_shear5_azi0.dat  !! file containing Xi, Vi and Lij=d(Vi)/d(Xj)
+81,31,2,2  !!  nx,ny, X,Y calc steps
+21,1,25,16 !!  (upper left)  (lower right) 11,1,31,nz  or 51,1,71,nz
+13 7d1 !! size3, number of grains=size3^3, fraction of olivine (%)
+1d0 2d0 3d0 1d60 1d0	!! tau1, tau2, tau3, tau4 (olivine), tau_ens (enstatite)
+125d0				!! Mob (grain boundary mobility)
+0.20d0				!! chi (threshold volume fraction for GBS)
+
+!!! NB: X1(1) must be smaller than X1(nx1) AND X3(1) must be smaller than X3(nx3)
+!!! X3 should be positive in that version of the code
+
